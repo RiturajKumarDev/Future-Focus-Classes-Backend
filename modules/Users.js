@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema(
         dob: { type: String, required: true },
         gender: { type: String, required: true },
         password: { type: String, required: true },
+        image: { type: String, default: "👨‍🏫" },
 
         // For Student
         parentName: String,
@@ -22,6 +23,7 @@ const UserSchema = new mongoose.Schema(
         specialization: String,
         teachingSubjects: Array,
         resume: String,
+        bio: String,
 
         // Address
         address: { type: String, required: true },

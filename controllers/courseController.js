@@ -2,8 +2,8 @@ const fs = require("fs");
 const Courses = require("../modules/Courses");
 
 exports.createCourse = async (req, res, next) => {
-    const { title, category, subcategory, level, grade, language, price, shortDescription, thumbnailUrl, instructor, totalDuration, totalLectures, rating, learningObjectives, features, welcomeMessage, completionMessage } = req.body;
-    const course = new Courses({ title, category, grade, subcategory, level, language, thumbnailUrl, price, shortDescription, instructor, totalDuration, totalLectures, rating, learningObjectives, features, welcomeMessage, completionMessage });
+    const { title, category, subcategory, level, grade, language, price, shortDescription, thumbnailUrl, instructor,instructorEmail, totalDuration, totalLectures, rating, learningObjectives, features, welcomeMessage, completionMessage } = req.body;
+    const course = new Courses({ title, category, grade, subcategory, level, language, thumbnailUrl, price, shortDescription, instructor,instructorEmail, totalDuration, totalLectures, rating, learningObjectives, features, welcomeMessage, completionMessage });
     course.save()
         .then(result => {
             return res.status(201).json(course);

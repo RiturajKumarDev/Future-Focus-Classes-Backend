@@ -7,6 +7,8 @@ const rootDir = require("./utils/pathUtil");
 const { studentRouter } = require("./routes/studentRouter");
 const { authRouter } = require("./routes/authRouter");
 const { courseRouter } = require("./routes/courseRouter");
+const { teacherRouter } = require("./routes/teacherRouter");
+const { studentResultRouter } = require("./routes/studentResultRouter");
 
 const DB_PATH = "mongodb+srv://root:RiTUR%40JKUM%40R1105@riturajkumardev.nxnptwm.mongodb.net/FutureFocusClasses?retryWrites=true&w=majority&appName=RiturajKumarDev";
 
@@ -23,6 +25,8 @@ app.use((req, res, next) => {
 app.use("/api/student", authRouter);
 app.use("/api/course", courseRouter);
 app.use("/api/student", studentRouter);
+app.use("/api/teacher", teacherRouter);
+app.use("/api/result", studentResultRouter);
 
 
 app.use((req, res) => {

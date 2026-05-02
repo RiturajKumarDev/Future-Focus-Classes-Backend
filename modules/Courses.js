@@ -11,6 +11,7 @@ const CourseSchema = new mongoose.Schema(
         thumbnailUrl: String,
         shortDescription: String,
         instructor: String,
+        instructorEmail: String,
         grade: String,
         totalDuration: String,
         totalLectures: String,
