@@ -2,7 +2,7 @@ const Users = require("../modules/Users");
 
 exports.getTeachers = async (req, res, next) => {
     try {
-        const users = await Users.find({ userType: 'teacher' });
+        const users = await Users.find({ role: 'teacher' });
         res.status(201).json(users);
     } catch (err) {
         res.status(500).json({ "errors": err.errmsg });

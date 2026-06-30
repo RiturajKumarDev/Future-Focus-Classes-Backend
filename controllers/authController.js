@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { check, validationResult } = require("express-validator");
 const Users = require("../modules/Users");
 
@@ -8,9 +9,7 @@ exports.register = [
         .withMessage('Name is required')
         .trim()
         .isLength({ min: 2 })
-        .withMessage("Name must be at least 2 characters long")
-        .matches(/^[a-zA-Z\s]+$/)
-        .withMessage('Name can only contain letters'),
+        .withMessage("Name must be at least 2 characters long"),
     check("email")
         .isEmail()
         .withMessage("Please enter a valid email")
@@ -27,13 +26,7 @@ exports.register = [
         .matches(/[!@#$%^&*(),.?":{}|<>]/)
         .withMessage("Password should contain atleast one special character")
         .trim(),
-    check("confirmPassword")
-        .custom((value, { req }) => {
-            if (value != req.body.password)
-                throw new Error("Passwords do not match");
-            return true;
-        }),
-    check('mobile')
+    check('phone')
         .notEmpty()
         .withMessage('mobile is required')
         .trim()
@@ -41,41 +34,14 @@ exports.register = [
         .withMessage("mobile must be at 10 digits")
         .matches(/[0-9]/)
         .withMessage('Mobile can only contain digits'),
-    check("gender")
-        .notEmpty()
-        .withMessage("Please select a user type")
-        .isIn(["male", "female", "other"])
-        .withMessage("Invalud gender type"),
-    check('city')
-        .notEmpty()
-        .withMessage('city is required')
-        .trim()
-        .isLength({ min: 2 })
-        .withMessage("city must be at least 2 characters long"),
-    check('pincode')
-        .notEmpty()
-        .withMessage('pincode is required')
-        .trim()
-        .isLength({ min: 6 })
-        .withMessage("Parent must be at 6 digits")
-        .matches(/[0-9]/)
-        .withMessage('pincode can only contain digits'),
-    check('address')
-        .notEmpty()
-        .withMessage('address is required')
-        .trim()
-        .isLength({ min: 10 })
-        .withMessage("address must be at least 10 characters long"),
     (req, res, next) => {
-        const user = {
-            userType, fullName, email, mobile, dob, gender, password,
-            // For student
-            classTh, parentName, parentMobile,
-            // For Teacher
-            qualification, specialization, experience, teachingSubjects, resume,
-            // Address
-            city, pincode, address,
+        const {
+            fullName, role, batch, email, password,
+            phone, subject, experience, quals, bio,
         } = req.body;
+        const avatarArr = String(fullName).toUpperCase().split(" ");
+        const avatar = (avatarArr[0][0] + (avatarArr[1][0] ? avatarArr[1][0] : ""));
+        const qualifications = String(quals).toUpperCase().split(",");
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             console.log(errors);
@@ -86,7 +52,7 @@ exports.register = [
 
         bcrypt.hash(password, 12)
             .then(hashPassword => {
-                const user = new Users({ ...req.body, password: hashPassword });
+                const user = new Users({ ...req.body, avatar, quals: qualifications, password: hashPassword });
                 user.save()
                     .then((result) => {
                         return res.status(201).json(result);
@@ -106,5 +72,21 @@ exports.login = async (req, res, next) => {
     if (!user) return res.status(422).json({ "errors": ['Invalid emial or password!!!'] });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(422).json({ "errors": ['Invalid emial or password!!!'] });
-    res.status(201).json(user);
+    const userData = user.toObject();
+    delete userData.password;
+    // Generate JWT
+    const token = jwt.sign(userData,
+        process.env.JWT_SECRET,
+        {
+            expiresIn: process.env.JWT_EXPIRES_IN || "7d"
+        }
+    );
+    return res.status(200).json({
+        token,
+        user: userData
+    });
 };
+
+exports.profile = async (req, res, next) => {
+    res.json(req.user);
+}

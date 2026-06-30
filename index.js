@@ -1,16 +1,15 @@
 const express = require("express");
 const path = require("path");
 const cors = require("cors");
+require("dotenv").config();
 const { default: mongoose } = require("mongoose");
 
 const rootDir = require("./utils/pathUtil");
-const { studentRouter } = require("./routes/studentRouter");
 const { authRouter } = require("./routes/authRouter");
 const { courseRouter } = require("./routes/courseRouter");
 const { teacherRouter } = require("./routes/teacherRouter");
-const { studentResultRouter } = require("./routes/studentResultRouter");
-
-const DB_PATH = "mongodb+srv://root:RiTUR%40JKUM%40R1105@riturajkumardev.nxnptwm.mongodb.net/FutureFocusClasses?retryWrites=true&w=majority&appName=RiturajKumarDev";
+const { topResultRouter } = require("./routes/topResultRouter");
+const jwtController = require("./controllers/jwtController");
 
 const app = express();
 app.use(cors());
@@ -22,11 +21,10 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use("/api/student", authRouter);
-app.use("/api/course", courseRouter);
-app.use("/api/student", studentRouter);
-app.use("/api/teacher", teacherRouter);
-app.use("/api/result", studentResultRouter);
+app.use("/api", authRouter);
+app.use("/api/course", jwtController.jwt, courseRouter);
+app.use("/api/teachers", teacherRouter);
+app.use("/api/toppers", topResultRouter);
 
 
 app.use((req, res) => {
@@ -34,8 +32,8 @@ app.use((req, res) => {
     // send("<h1 style='text-align:center'>404 Error!!</h1><h2 style='color:red;text-align:center'>Page not found!!</h2>");
 });
 
-const PORT = 3000;
-mongoose.connect(DB_PATH)
+const PORT = process.env.PORT || 3000;
+mongoose.connect(process.env.MONGODB_URI)
     .then(() => {
         app.listen(PORT, () => {
             console.log(`Running server on http://localhost:${PORT}`);
